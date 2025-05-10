@@ -3,8 +3,10 @@ from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 import pandas as pd
 from helpers.prediction import prediction
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:3000"])
 
 @app.route("/fcsv", methods=['POST'])
 def fcsv():
@@ -20,7 +22,8 @@ def fcsv():
         df['Inc_Time_Ch' + str(i)] = pd.to_timedelta(df['Inc_Time_Ch' + str(i)]).dt.seconds
     res = prediction(df)
 
-    os.remove(csvpath)
+    if(os.path.isfile(csvpath)):
+        os.remove(csvpath)
     return jsonify(res)
 
 @app.route("/fman", methods=['POST'])
@@ -68,10 +71,10 @@ def rcsv():
         feats['SE_Diff_Ch' + str(i)] = df['Ch' + str(i)].iloc[-1] - df['Ch' + str(i)].iloc[0]
     
     df = pd.DataFrame([feats])
-    print(df)
     res = prediction(df)
 
-    os.remove(csvpath)
+    if(os.path.isfile(csvpath)):
+        os.remove(csvpath)
     return jsonify(res) 
 
 '''
